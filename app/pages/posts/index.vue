@@ -4,7 +4,7 @@
       <div slot="header" class="clearfix">
         <span>新規投稿</span>
       </div>
-      <el-table :data="showPosts" style="width: 100%" class="table">
+      <el-table :data="showPosts" style="width: 100%;" @row-click="handleClick" class="table">
         <el-table-column prop="title" label="タイトル"></el-table-column>
         <el-table-column prop="user.id" label="投稿者" width="180">
         </el-table-column>
@@ -19,30 +19,25 @@
 </template>
 
 <script>
-import faker from "faker";
+import moment from "~/plugins/moment";
+import { mapGetters } from "vuex";
+
 export default {
+  async asyncData({ store }) {
+    await store.dispatch("posts/fetchPosts");
+  },
   computed: {
     showPosts() {
-      return [
-        {
-          id: "001",
-          title: "title001",
-          body: faker.lorem.sentence,
-          created_at: "2019/07/23 12:00:00",
-          user: {
-            id: "mitomex"
-          }
-        },
-        {
-          id: "002",
-          title: "title002",
-          body: faker.lorem.sentence,
-          created_at: "2019/07/24 12:00:00",
-          user: {
-            id: "mitomex"
-          }
-        }
-      ];
+      return this.posts.map(post => {
+        post.created_at = moment(post.created_at).format("YYYY/MM/DD HH:mm:ss");
+        return post;
+      });
+    },
+    ...mapGetters("posts", ["posts"])
+  },
+  methods: {
+    handleClick(post) {
+      this.$router.push(`/posts/${post.id}`);
     }
   }
 };
